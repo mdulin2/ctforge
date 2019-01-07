@@ -4,6 +4,7 @@ CREATE TABLE teams (
     name          VARCHAR(60) NOT NULL,
     token         VARCHAR(60) NOT NULL,
     poc           INT DEFAULT NULL,
+    hints         INT DEFAULT 0, 
     PRIMARY KEY (id),
     UNIQUE (name),
     UNIQUE (ip),

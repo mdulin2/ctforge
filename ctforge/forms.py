@@ -42,6 +42,18 @@ class AdminWriteupForm(FlaskForm):
     grade = IntegerField('grade', validators=[validators.Optional(), validators.NumberRange(message='Grade should be between 0 and 10.', min=0, max=10)])
     feedback = TextAreaField('feedback')
 
+class ManualForm(FlaskForm):
+    team_id = IntegerField('team_id', validators=[validators.DataRequired()])
+    chal_id = IntegerField('Challenge Number')
+
+    level = IntegerField('What level of points would you like to take away from the team for the hints? Take a percentage based upon the guideline.',
+    validators=[validators.DataRequired(),validators.NumberRange(message='Deduction should be between 1 and 5.', min=1, max=5)])
+
+class FixForm(FlaskForm):
+    team_id = IntegerField('team_id', validators=[validators.DataRequired()])
+    points = IntegerField('Points to add')
+    remember_me = StringField("Remember, this will set the teams hint value to EXACTLY what is in the points field. So, be careful. Put anything in here to validate this...", validators=[validators.DataRequired()])
+    
 class UserForm(FlaskForm):
     team_id = IntegerField('team_id', validators=[validators.Optional()])
     name = StringField('name', validators=[validators.DataRequired()])

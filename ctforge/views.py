@@ -218,7 +218,7 @@ def add_team():
             query_handler((
                 'INSERT INTO teams (ip, name, token, poc) '
                 'VALUES (%s, %s, %s, %s)'),
-                (form.ip.data, form.name.data, form.token.data, 
+                (form.ip.data, form.name.data, form.token.data,
                  form.poc.data))
         else:
             flash_errors(form)
@@ -236,7 +236,7 @@ def edit_team(id):
             query_handler((
                 'UPDATE teams SET ip = %s, name = %s, token = %s, poc = %s '
                 'WHERE id = %s'),
-                (form.ip.data, form.name.data, form.token.data, 
+                (form.ip.data, form.name.data, form.token.data,
                  form.poc.data, id))
         else:
             flash_errors(form)
@@ -308,7 +308,7 @@ def add_challenge():
                 '                        active, writeup, writeup_template) '
                 'VALUES (%s, %s, %s, %s, %s, %s, %s)'),
                 [form.name.data, form.description.data, form.flag.data,
-                 form.points.data, form.active.data, form.writeup.data, 
+                 form.points.data, form.active.data, form.writeup.data,
                  form.writeup_template.data])
         else:
             flash_errors(form)
@@ -329,7 +329,7 @@ def edit_challenge(id):
                 '    active = %s, writeup = %s, writeup_template = %s '
                 'WHERE id = %s'),
                 [form.name.data, form.description.data, form.flag.data,
-                 form.points.data, form.active.data, form.writeup.data, 
+                 form.points.data, form.active.data, form.writeup.data,
                  form.writeup_template.data, id])
         else:
             flash_errors(form)
@@ -542,6 +542,100 @@ def challenges():
 
     return render_template('challenges.html', **challenges_data)
 
+# For emergancy uses only! 
+@app.route('/admin/fixHints', methods=['GET','POST'])
+@admin_required
+def fixHints():
+    form =ctforge.forms.FixForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+
+            query_handler((
+                'UPDATE teams '
+                'SET hints = %s '
+                'WHERE id = %s;'),
+                (form.points.data, form.team_id.data))
+        else:
+            flash_errors(form)
+        return redirect(url_for('admin', tab='challenges'))
+    return render_template('admin/data.html', form=form, target='challenge',
+                           action='add')
+
+@app.route('/admin/manual', methods=['GET','POST'])
+@admin_required
+def manual_add_points():
+    db_conn = get_db_connection()
+    cur = db_conn.cursor()
+    form = ctforge.forms.ManualForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            # Get previous hint subtraction
+
+            # Input validation
+            team_check, chal_check = _manual_info(form.team_id.data, form.chal_id.data)
+            print(team_check, chal_check)
+            if(team_check == False):
+                flash("Team does not exist.")
+                cur.close()
+                return redirect(url_for('admin', tab='challenges'))
+
+            elif(chal_check == False):
+                flash("Challenge ID does not exist")
+                cur.close()
+                return redirect(url_for('admin', tab='challenges'))
+
+            points = derive_deduction(form.level.data, chal_check)
+
+            cur.execute((
+                'SELECT hints AS hints '
+                'FROM teams '
+                'WHERE id =%s'
+                ),[form.team_id.data])
+
+            hints_points = cur.fetchall()
+            hints_points = points + hints_points[0]['hints']
+
+            # Update hints value
+            cur.execute((
+                'UPDATE teams '
+                'SET hints = %s '
+                'WHERE id = %s;'
+            ),[hints_points, form.team_id.data])
+
+        else:
+            flash_errors(form)
+        cur.close()
+        return redirect(url_for('admin', tab='challenges'))
+    cur.close()
+    return render_template('admin/data.html', form=form, target='challenge',
+                           action='add')
+# Deducts in 20% increments
+def derive_deduction(scale, points_for_chal):
+    mult = 0.12
+    scale = scale * 0.20
+    return scale * points_for_chal
+
+# Checks the information in the manual section to prevent errors
+def _manual_info(team_id, challenge_id):
+    db_conn = get_db_connection()
+    cur = db_conn.cursor()
+    cur.execute((
+        'SELECT id '
+        'FROM teams '
+        'WHERE id = %s'
+        ),[team_id])
+    teams_ids = cur.fetchall()
+
+    cur.execute((
+        'SELECT points '
+        'FROM challenges '
+        'WHERE id = %s'
+        ),[challenge_id])
+    chal_points = cur.fetchall()
+
+    return len(teams_ids) > 0, len(chal_points) > 0 if chal_points else False
+
+
 @cache.cached(timeout=30)
 def _challenges():
     db_conn = get_db_connection()
@@ -550,16 +644,24 @@ def _challenges():
     cur.execute('SELECT * FROM challenges')
     res = cur.fetchall()
     chals = {c['id']: c for c in res} if len(res) != 0 else dict()
+
+    # Bonus object
+    #bonus_dict = {'id': len(chals) +1, 'name': 'Bonus', 'flag': 'None', 'points': '?','active': True, 'writeup': False, 'writeup_template': ''}
+
+    #chals[len(chals) + 1] = bonus_dict
+
+
+
     # get only the users who solved at least one challenge that are not admin
     # and not hidden, sorted by timestamp. Along with the users get the
     # information about the solved challenges
     cur.execute((
         'SELECT U.id AS user_id, U.name AS name, U.surname AS surname, '
-        '       U.admin AS admin, U.hidden AS hidden, '
+        '       T.hints as Hints, U.admin AS admin, U.hidden AS hidden, '
         '       CA.challenge_id AS challenge_id, CA.timestamp AS timestamp '
         'FROM users AS U JOIN challenge_attacks AS CA '
-        'ON U.id = CA.user_id '
-        'WHERE NOT admin AND NOT hidden '
+        'ON U.id = CA.user_id, teams as T '
+        'WHERE NOT admin AND NOT hidden AND T.id = U.team_id '
         'ORDER BY timestamp ASC '))
     challenge_attacks = cur.fetchall()
     cur.close()
@@ -568,7 +670,7 @@ def _challenges():
     # map the pair challenge id and user id to the timestamp
     attacks = dict()
     for ca in challenge_attacks:
-        users[ca['user_id']] = '{} {}'.format(ca['name'], ca['surname'])
+        users[ca['user_id']] = ('{} {}'.format(ca['name'], ca['surname']), ca['hints'])
         attacks[(ca['challenge_id'], ca['user_id'])] = ca['timestamp']
 
     # compute the bonus: +3 for firt shot, +2 to second and +1 to third
@@ -589,7 +691,8 @@ def _challenges():
     # compute the scoreboard as a list of dictionaries
     scoreboard = []
     for u, uv in users.items():
-        score = {'user': uv, 'points': 0}
+
+        score = {'user': uv[0], 'points': 0}
         score['challenges'] = dict()
         for c, cv in chals.items():
             try:
@@ -603,134 +706,139 @@ def _challenges():
                 timestamp = None
                 points = 0
             score['challenges'][c] = {'timestamp': timestamp, 'points': points}
+
+        # hint points subtraction
+        score['points'] -= uv[1]
+        score['hints'] = -1 * uv[1]
+
         scoreboard.append(score)
     # sort the scoreboard by total points
     scoreboard = sorted(scoreboard, key=lambda x: x['points'], reverse=True)
 
-    # charts computation
-    graph_template = {
-        "type": "serial",
-        "categoryField": "date",
-        "dataDateFormat": "YYYY-MM-DD HH:NN:SS",
-        "startDuration": 0.5,
-        "startEffect": "easeOutSine",
-        "fontFamily": "Monda",
-        "fontSize": 14,
-        "theme": "dark",
-        "categoryAxis": {
-            "minPeriod": "ss",
-            "parseDates": True
-        },
-        "chartCursor": {
-            "enabled": True,
-            "categoryBalloonDateFormat": "JJ:NN:SS",
-            "categoryBalloonText": "[[category]]"
+    # # charts computation
+    # graph_template = {
+    #     "type": "serial",
+    #     "categoryField": "date",
+    #     "dataDateFormat": "YYYY-MM-DD HH:NN:SS",
+    #     "startDuration": 0.5,
+    #     "startEffect": "easeOutSine",
+    #     "fontFamily": "Monda",
+    #     "fontSize": 14,
+    #     "theme": "dark",
+    #     "categoryAxis": {
+    #         "minPeriod": "ss",
+    #         "parseDates": True
+    #     },
+    #     "chartCursor": {
+    #         "enabled": True,
+    #         "categoryBalloonDateFormat": "JJ:NN:SS",
+    #         "categoryBalloonText": "[[category]]"
+    #
+    #     },
+    #     "chartScrollbar": {
+    #         "enabled": True,
+    #         "dragIcon": "dragIconRectSmall"
+    #     },
+    #     "trendLines": [],
+    #     "graphs": [],
+    #     "guides": [],
+    #     "valueAxes": [
+    #         {
+    #             "id": "ValueAxis-1",
+    #             "title": ""
+    #         }
+    #     ],
+    #     "allLabels": [],
+    #     "balloon": {},
+    #     "legend": {
+    #         "enabled": True,
+    #         "useGraphSettings": True,
+    #         "color": "#D4D4D4",
+    #     },
+    #     "titles": [
+    #         {
+    #             "id": "Title-1",
+    #             "size": 15,
+    #             "text": ""
+    #         }
+    #     ],
+    #     "dataProvider": []
+    # }
+    #
+    # date_start = app.config['DATE_START']
+    # date_now = datetime.datetime.now()
+    # challenges_graph_dict = {c_id: [] for c_id in chals.keys()}
+    #
+    # # compute the chart of points over time for each user
+    # users_graphs = []
+    # users_data_provider = []
+    # for i, board_entry in enumerate(scoreboard):
+    #     users_graphs.append({
+    #         "id": "mygraph-{}".format(i),
+    #         "title": board_entry['user'],
+    #         "valueField": "column-{}".format(i),
+    #         "type": "line",
+    #         "lineThickness": 3,
+    #         "balloonText": "[[title]] [[value]]pts"})
+    #     user_points = [[date_start.timestamp(), 0]]
+    #     for chal_id, chal in board_entry['challenges'].items():
+    #         if chal['timestamp'] is not None:
+    #             user_points.append([chal['timestamp'].timestamp(), chal['points']])
+    #             challenges_graph_dict[chal_id].append([chal['timestamp'].timestamp(), 1])
+    #
+    #     # sort the list by date
+    #     user_points = sorted(user_points, key=lambda x: x[0])
+    #     # finally add the current date to the list
+    #     user_points.append([date_now.timestamp(), 0])
+    #     # perform the sum over all the points piled up by the current user
+    #     for j in range(1, len(user_points)):
+    #         user_points[j][1] += user_points[j - 1][1]
+    #     # finally add the newly created list to the data_provider list
+    #     for ts, pt in user_points:
+    #         users_data_provider.append({
+    #             "date": datetime.datetime.fromtimestamp(int(ts)).strftime('%Y-%m-%d %H:%M:%S'),
+    #             "column-{}".format(i): pt
+    #         })
+    # users_graph = deepcopy(graph_template)
+    # users_graph['titles'][0]['text'] = 'Players'
+    # users_graph['valueAxes'][0]['title'] = 'Points'
+    # users_graph['graphs'] = users_graphs
+    # users_graph['dataProvider'] = sorted(users_data_provider, key=lambda x: x['date'])
+    #
+    # # compute the cart of challenge solvers over time for each challenge
+    # challenges_graphs = []
+    # challenges_data_provider = []
+    #
+    # for i, chal in enumerate(chals.values()):
+    #     challenges_graphs.append({
+    #         "id": "mygraph-{}".format(i),
+    #         "title": chal['name'],
+    #         "valueField": "column-{}".format(i),
+    #         "type": "line",
+    #         "lineThickness": 3,
+    #         "balloonText": "[[title]] solved by [[value]]"})
+    #
+    # for i, chal in enumerate(challenges_graph_dict.values()):
+    #     chal_aux = chal
+    #     chal_aux.append([date_now.timestamp(), 0])
+    #     chal_aux = sorted(chal_aux, key=lambda x: x[0])
+    #     for j in range(1, len(chal_aux)):
+    #         chal_aux[j][1] += chal_aux[j - 1][1]
+    #         # finally add the newly created list to the data_provider list
+    #     for ts, solvers in chal_aux:
+    #         challenges_data_provider.append({
+    #             "date": datetime.datetime.fromtimestamp(int(ts)).strftime('%Y-%m-%d %H:%M:%S'),
+    #             "column-{}".format(i): solvers
+    #         })
+    #
+    # challenges_graph = deepcopy(graph_template)
+    # challenges_graph['titles'][0]['text'] = 'Challenges'
+    # challenges_graph['valueAxes'][0]['title'] = 'Solvers'
+    # challenges_graph['graphs'] = challenges_graphs
+    # challenges_graph['dataProvider'] = challenges_data_provider
 
-        },
-        "chartScrollbar": {
-            "enabled": True,
-            "dragIcon": "dragIconRectSmall"
-        },
-        "trendLines": [],
-        "graphs": [],
-        "guides": [],
-        "valueAxes": [
-            {
-                "id": "ValueAxis-1",
-                "title": ""
+    return {'challenges': chals, 'scoreboard': scoreboard
             }
-        ],
-        "allLabels": [],
-        "balloon": {},
-        "legend": {
-            "enabled": True,
-            "useGraphSettings": True,
-            "color": "#D4D4D4",
-        },
-        "titles": [
-            {
-                "id": "Title-1",
-                "size": 15,
-                "text": ""
-            }
-        ],
-        "dataProvider": []
-    }
-
-    date_start = app.config['DATE_START']
-    date_now = datetime.datetime.now()
-    challenges_graph_dict = {c_id: [] for c_id in chals.keys()}
-
-    # compute the chart of points over time for each user
-    users_graphs = []
-    users_data_provider = []
-    for i, board_entry in enumerate(scoreboard):
-        users_graphs.append({
-            "id": "mygraph-{}".format(i),
-            "title": board_entry['user'],
-            "valueField": "column-{}".format(i),
-            "type": "line",
-            "lineThickness": 3,
-            "balloonText": "[[title]] [[value]]pts"})
-        user_points = [[date_start.timestamp(), 0]]
-        for chal_id, chal in board_entry['challenges'].items():
-            if chal['timestamp'] is not None:
-                user_points.append([chal['timestamp'].timestamp(), chal['points']])
-                challenges_graph_dict[chal_id].append([chal['timestamp'].timestamp(), 1])
-
-        # sort the list by date
-        user_points = sorted(user_points, key=lambda x: x[0])
-        # finally add the current date to the list
-        user_points.append([date_now.timestamp(), 0])
-        # perform the sum over all the points piled up by the current user
-        for j in range(1, len(user_points)):
-            user_points[j][1] += user_points[j - 1][1]
-        # finally add the newly created list to the data_provider list
-        for ts, pt in user_points:
-            users_data_provider.append({
-                "date": datetime.datetime.fromtimestamp(int(ts)).strftime('%Y-%m-%d %H:%M:%S'),
-                "column-{}".format(i): pt
-            })
-    users_graph = deepcopy(graph_template)
-    users_graph['titles'][0]['text'] = 'Players'
-    users_graph['valueAxes'][0]['title'] = 'Points'
-    users_graph['graphs'] = users_graphs
-    users_graph['dataProvider'] = sorted(users_data_provider, key=lambda x: x['date'])
-
-    # compute the cart of challenge solvers over time for each challenge
-    challenges_graphs = []
-    challenges_data_provider = []
-
-    for i, chal in enumerate(chals.values()):
-        challenges_graphs.append({
-            "id": "mygraph-{}".format(i),
-            "title": chal['name'],
-            "valueField": "column-{}".format(i),
-            "type": "line",
-            "lineThickness": 3,
-            "balloonText": "[[title]] solved by [[value]]"})
-
-    for i, chal in enumerate(challenges_graph_dict.values()):
-        chal_aux = chal
-        chal_aux.append([date_now.timestamp(), 0])
-        chal_aux = sorted(chal_aux, key=lambda x: x[0])
-        for j in range(1, len(chal_aux)):
-            chal_aux[j][1] += chal_aux[j - 1][1]
-            # finally add the newly created list to the data_provider list
-        for ts, solvers in chal_aux:
-            challenges_data_provider.append({
-                "date": datetime.datetime.fromtimestamp(int(ts)).strftime('%Y-%m-%d %H:%M:%S'),
-                "column-{}".format(i): solvers
-            })
-
-    challenges_graph = deepcopy(graph_template)
-    challenges_graph['titles'][0]['text'] = 'Challenges'
-    challenges_graph['valueAxes'][0]['title'] = 'Solvers'
-    challenges_graph['graphs'] = challenges_graphs
-    challenges_graph['dataProvider'] = challenges_data_provider
-
-    return {'challenges': chals, 'scoreboard': scoreboard,
-            'users_graph': users_graph, 'challenges_graph': challenges_graph}
 
 
 @app.route('/challenge/<name>',  methods=['GET', 'POST'])
@@ -843,7 +951,7 @@ def challenge(name):
     db_conn.close()
 
     return render_template('challenge.html', flag_form=flag_form, writeup_form=writeup_form,
-                           challenge=challenge, evaluation=evaluation, solved=solved, 
+                           challenge=challenge, evaluation=evaluation, solved=solved,
                            graded=graded, writeups=writeups)
 
 
@@ -931,7 +1039,7 @@ def scoreboard():
 
     # get all the other stuff out of the cached function
     scoreboard_data = _scoreboard(rnd)
-    
+
     return render_template('scoreboard.html', rnd=rnd, time_left=seconds_left, **scoreboard_data)
 
 #@cache.cached(timeout=60)
@@ -955,7 +1063,7 @@ def _scoreboard(rnd):
     board = {}
     for r in results:
         board[r['id']] = {
-            'team': r['name'], 'ip': r['ip'], 'id': r['id'], 
+            'team': r['name'], 'ip': r['ip'], 'id': r['id'],
             'attack': r['attack'], 'defense': r['defense'],
             'ratio_attack': 0, 'ratio_defense': 0, 'position': 0,
             'services': {}, 'attack_scores': [], 'defense_scores': [],
