@@ -51,9 +51,9 @@ class ManualForm(FlaskForm):
 
 class FixForm(FlaskForm):
     team_id = IntegerField('team_id', validators=[validators.DataRequired()])
-    points = IntegerField('Points to add')
+    points = IntegerField('Set hint value to: ')
     remember_me = StringField("Remember, this will set the teams hint value to EXACTLY what is in the points field. So, be careful. Put anything in here to validate this...", validators=[validators.DataRequired()])
-    
+
 class UserForm(FlaskForm):
     team_id = IntegerField('team_id', validators=[validators.Optional()])
     name = StringField('name', validators=[validators.DataRequired()])

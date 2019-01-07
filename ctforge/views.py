@@ -611,7 +611,7 @@ def manual_add_points():
 # Deducts in 20% increments
 def derive_deduction(scale, points_for_chal):
     mult = 0.12
-    scale = scale * 0.20
+    scale = scale * mult
     return scale * points_for_chal
 
 # Checks the information in the manual section to prevent errors
@@ -632,7 +632,7 @@ def _manual_info(team_id, challenge_id):
         ),[challenge_id])
     chal_points = cur.fetchall()
 
-    return len(teams_ids) > 0, len(chal_points) > 0 if chal_points else False
+    return len(teams_ids) > 0, chal_points[0]['points'] if len(chal_points) > 0 else False
 
 
 @cache.cached(timeout=30)
