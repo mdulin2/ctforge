@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# Will need to add an IP for this.
+ssh -i ~/maxwell.pem ubuntu@$1 "echo 'flag:$2' > /tmp/Services/ServiceA/Flag.txt"  

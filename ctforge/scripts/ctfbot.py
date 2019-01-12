@@ -112,7 +112,7 @@ class Worker(threading.Thread):
         self.service = None
         # current flag for the pair (team, service)
         self.flag = None
-        # worker modalities 
+        # worker modalities
         self.dispatch = dispatch
         self.check = check
         # seconds to wait before killing a spawned script
@@ -128,8 +128,10 @@ class Worker(threading.Thread):
         while not Worker.killing_time.is_set():
             try:
                 self.team, self.service = tasks.get_nowait()
+
                 # get the active flag for this team/service
-                self._get_flag()
+                #self._get_flag()
+
                 # check whether we need to dispatch the flag or check the service
                 # status and proceed according to the given mode. The program logic
                 # is not f*cked if we execute both actions. Theoretically, one
@@ -140,7 +142,7 @@ class Worker(threading.Thread):
                 if self.check:
                     self._check_service()
             except Empty:
-                # terminate if the queue is empty 
+                # terminate if the queue is empty
                 break
 
     def _get_flag(self):
@@ -185,7 +187,7 @@ class Worker(threading.Thread):
                     it's probably our fault as above
         * else:     the service is corrupted
 
-        The script is killed if it takes too long to complete and the 
+        The script is killed if it takes too long to complete and the
         service marked as corrupted."""
 
         # execute the script and assume the service status by the return address
@@ -195,12 +197,13 @@ class Worker(threading.Thread):
             return
         success = status == 0
         try:
-            with db_conn.cursor() as cur:
-                cur.execute((
-                    'INSERT INTO integrity_checks (flag, successful) '
-                    'VALUES (%s, %s)')
-                    , [self.flag, success])
-            db_conn.commit()
+            pass
+            # with db_conn.cursor() as cur:
+            #     cur.execute((
+            #         'INSERT INTO integrity_checks (flag, successful) '
+            #         'VALUES (%s, %s)')
+            #         , [self.flag, success])
+            # db_conn.commit()
         except psycopg2.Error as e:
             # an error occurred, no recovery possible
             logger.critical(self._logalize(('Unable to insert the integrity check report: {}').format(e)))
@@ -211,7 +214,17 @@ class Worker(threading.Thread):
     def _execute(self, script_name):
         """Execute the provided script killing the process if it timeouts."""
 
+
+        '''
+            ******
+            Testing only
+            ******
+            NEED TO REMOVE SOON
+        '''
+        self.flag = "1"
+
         # set status of the service to corrupted by default
+
         status = 1
         command = ' '.join([script_name, self.team.ip, self.flag])
         try:
@@ -223,7 +236,7 @@ class Worker(threading.Thread):
             status = process.returncode
         except subprocess.TimeoutExpired:
             # the remote VM could be down, this is not a critical error but we
-            # should anyway give it a look 
+            # should anyway give it a look
             logger.warning(self._logalize("Timeout exceeded while executing {}".format(command)))
             # politely kill the process tree and wait a small amount of time for
             # the process to clear resources
@@ -242,13 +255,14 @@ class Worker(threading.Thread):
             # wtf happened? this is an unknown error. Assume it's our fault
             status = -1
             logger.critical(self._logalize('Error while executing {}: {}'.format(command, e)))
-
+            
+        print("Status", status)
         return status
 
     def _logalize(self, message):
         """Return a pretty string ready to be logged."""
 
-        return 'Worker-{} ({}, {}): {}'.format(self.n, self.team.ip, 
+        return 'Worker-{} ({}, {}): {}'.format(self.n, self.team.ip,
                                                self.service.name, message)
 
 def get_teams_services():
@@ -310,7 +324,6 @@ def advance_round(teams, services):
 
 def main():
     global logger, db_conn
-
     # parse command line options, the round parameter is required
     parser = argparse.ArgumentParser(description='Flag dispatcher and checker')
     parser.add_argument('--advance', action='store_true', default=False,
@@ -323,14 +336,14 @@ def main():
         help="Number of concurrent workers (default 1)")
     parser.add_argument('-t', dest='timeout', type=int, default=10,
         help="Seconds to wait before killing a spawned script (default 10)")
-    parser.add_argument('-v', dest='verbose', action='store_true', 
+    parser.add_argument('-v', dest='verbose', action='store_true',
         default=False, help="Set logging level to debug")
     args = parser.parse_args()
     if not any([args.advance, args.dispatch, args.check]):
         sys.stderr.write("At least one action is required, aborting.\n")
         abort()
 
-    # register the killer handler        
+    # register the killer handler
     signal.signal(signal.SIGINT, interrupt)
 
     # set variables
@@ -361,11 +374,12 @@ def main():
         # fill the queue of tasks, choosing the team order randomly :)
         for service in services:
             for team in random.sample(teams, len(teams)):
+                print(team, service)
                 tasks.put_nowait((team, service))
-
         # create the list of workers
         workers = []
         for i in range(n_workers):
+            # Boom baby!
             worker = Worker(i, args.dispatch, args.check, args.timeout)
             workers.append(worker)
             worker.start()
@@ -384,5 +398,9 @@ def main():
     # exit gracefully
     sys.exit(0)
 
+def help_max():
+    print(config['DISPATCH_SCRIPT_PATH'])
+
 if __name__ == "__main__":
+    #help_max()
     main()
