@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block title %}CTF Scoreboard{% endblock %}
+{% block content %}
+
+{% from "_macros.html" import get_status_badge %}
+
+<h1>Combined Scoreboard</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <table class="table">
+            <thead>
+                <tr>
+
+                    <td class="text-center"><font size ="+2" color="red"><b>Team</b></font></td>
+                    <td class="text-center"><font size ="+2" color="red"><b>Attack/Defense</b></font></td>
+                    <td class="text-center"><font size ="+2" color="red"><b>Wargame</b></font></td>
+                    <td class="text-center"><font size ="+2" color="red"><b>Overall</b></font></td>
+
+                </tr>
+            </thead>
+          <tbody>
+            {% for score in scores %}
+              <tr>
+                <td class="text-center"><font size="+1" color ="white"> <b>{{ score[0]}} </b></font> </td>
+                <td class="text-center"> {{ score[3] }} </td>
+                <td class="text-center"> {{ score[1]}} </td>
+                <td class="text-center"> <font size="+1" color ="white"> <b>{{ score[2]}} </b></font> </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+          </table>
+      </div>
+    </div>
+
+{% endblock %}

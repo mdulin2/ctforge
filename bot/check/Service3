@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# The URL to be used
+IP=http://$1:3001/koreanFood
+
+# The request being sent. Simply, just sending food_name to search for the character a in the database.
+
+output=`curl $(echo $IP) -H 'Origin: http://localhost:3001' -H 'Accept-Encoding: gzip, deflate, br' -H 'Accept-Language: en-US,en;q=0.9' -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36' -H 'Content-Type: application/json;charset=UTF-8' -H 'Accept: application/json, text/plain, */*' -H 'Referer: http://localhost:3001/koreanfood' -H 'Cookie: continueCode=l5wQlxzbmJ3wnyBRWKVEZrMa7d58HVukcVAejp294NvX6oq18DPYgOk5LKyM; session=.eJwlj0lqxDAQAP-i8xBaS3dLc8pPjHojwywGewyBkL_HkHsVVP2kJTbfv9L1vR1-ScvN0jVByaY916iluWWvAmBq1kq4VczEPkueCJkmcpQSyMSo3KYKm3rAnOJFuggPlpENePTe1DpCZWW0TANnG8PrYCI78YaCHRoQpUvSfYvlvd79dfY0Kyq9A0U0ktHIYBgixpmWB1CFGSpop3fsvv1P2PG4vZ7z-3M93o91vX_o-ky_f8ewRto.XDrkHA.j8A-uQSZsWJB6tdr8fRjsmuHU68' -H 'Connection: keep-alive' --data-binary '{"food_name":"a"}' --compressed`
+
+# Checks for a particular dish
+check=$(echo $output | grep "Galbi")
+
+# 1 if corrupted, 0 if working fine. 
+if [ -z "$check" ];
+then
+  exit 1
+else
+  exit 0
+fi

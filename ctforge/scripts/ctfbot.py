@@ -130,7 +130,7 @@ class Worker(threading.Thread):
                 self.team, self.service = tasks.get_nowait()
 
                 # get the active flag for this team/service
-                #self._get_flag()
+                self._get_flag()
 
                 # check whether we need to dispatch the flag or check the service
                 # status and proceed according to the given mode. The program logic
@@ -173,7 +173,7 @@ class Worker(threading.Thread):
         complete."""
 
         # execute the script ignoring its return status
-        self._execute(os.path.join(config['DISPATCH_SCRIPT_PATH'], self.service.name))
+        self._execute(os.path.join(config['DISPATCH_SCRIPT_PATH'], 'Service' + str(self.service.id +1)))
 
     def _check_service(self):
         """Check if a given service on a given host is working as expected by
@@ -191,19 +191,24 @@ class Worker(threading.Thread):
         service marked as corrupted."""
 
         # execute the script and assume the service status by the return address
-        status = self._execute(os.path.join(config['CHECK_SCRIPT_PATH'], self.service.name))
+
+        print(os.path.join(config['CHECK_SCRIPT_PATH'], 'Service'+ str(self.service.id)))
+        status = self._execute(os.path.join(config['CHECK_SCRIPT_PATH'], 'Service'+ str(self.service.id)))
+        print(status)
+        return
+
         if status == -1 or status > 125:
             # our fault: we don't add anything in the integrity_checks table
             return
         success = status == 0
         try:
             pass
-            # with db_conn.cursor() as cur:
-            #     cur.execute((
-            #         'INSERT INTO integrity_checks (flag, successful) '
-            #         'VALUES (%s, %s)')
-            #         , [self.flag, success])
-            # db_conn.commit()
+            with db_conn.cursor() as cur:
+                cur.execute((
+                    'INSERT INTO integrity_checks (flag, successful) '
+                    'VALUES (%s, %s)')
+                    , [self.flag, success])
+            db_conn.commit()
         except psycopg2.Error as e:
             # an error occurred, no recovery possible
             logger.critical(self._logalize(('Unable to insert the integrity check report: {}').format(e)))
@@ -214,17 +219,7 @@ class Worker(threading.Thread):
     def _execute(self, script_name):
         """Execute the provided script killing the process if it timeouts."""
 
-
-        '''
-            ******
-            Testing only
-            ******
-            NEED TO REMOVE SOON
-        '''
-        self.flag = "1"
-
         # set status of the service to corrupted by default
-
         status = 1
         command = ' '.join([script_name, self.team.ip, self.flag])
         try:
@@ -255,8 +250,8 @@ class Worker(threading.Thread):
             # wtf happened? this is an unknown error. Assume it's our fault
             status = -1
             logger.critical(self._logalize('Error while executing {}: {}'.format(command, e)))
-            
-        print("Status", status)
+
+        logger.debug("Status = " + str(status))
         return status
 
     def _logalize(self, message):
@@ -374,7 +369,6 @@ def main():
         # fill the queue of tasks, choosing the team order randomly :)
         for service in services:
             for team in random.sample(teams, len(teams)):
-                print(team, service)
                 tasks.put_nowait((team, service))
         # create the list of workers
         workers = []

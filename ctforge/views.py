@@ -436,6 +436,7 @@ def submit():
                 team_id = res['id']
                 # get the flag that the user is trying to submit, if valid
                 # (i.e. active and not one of the flags of his team)
+
                 cur.execute(('SELECT service_id FROM active_flags '
                              'WHERE flag = %s AND team_id != %s'),
                              [flag, team_id])
@@ -490,57 +491,6 @@ def submit():
         else:
             flash_errors(form)
     return render_template('submit.html', form=form, team_token=team_token)
-
-@app.route('/team')
-@attackdefense_mode_required
-@team_required
-@login_required
-def team():
-    """Render a page with useful information about one's team."""
-
-    db_conn = get_db_connection()
-    cur = db_conn.cursor()
-    # get the user's own team
-    cur.execute('SELECT * FROM teams WHERE id = %s',
-                [current_user.team_id])
-    team = cur.fetchone()
-    if team is None:
-        cur.close()
-        flash('Your team id is does not match any team', 'error')
-        return redirect(url_for('index'))
-    # get the members of the user's own team
-    cur.execute('SELECT * FROM users WHERE team_id = %s',
-                [current_user.team_id])
-    members = cur.fetchall()
-    # for each service get the number of attacks suffered and inflicted the
-    # user's team
-    cur.execute((
-        'SELECT S.name AS service_name, '
-        '       COUNT(A.flag) AS suffered, '
-        '       (SELECT COUNT(A1.flag) '
-        '        FROM active_flags AS F1 '
-        '        JOIN service_attacks AS A1 ON F1.flag = A1.flag '
-        '        WHERE A1.team_id = F.team_id AND F1.service_id = F.service_id '
-        '       ) AS inflicted '
-        'FROM services AS S '
-        'JOIN active_flags AS F ON S.id = F.service_id '
-        'LEFT JOIN service_attacks AS A ON F.flag = A.flag '
-        'WHERE F.team_id = %s '
-        'GROUP BY F.team_id, F.service_id, S.name'),
-        [current_user.team_id])
-    attacks = cur.fetchall()
-    cur.close()
-
-    return render_template('team.html', team=team, members=members, attacks=attacks)
-
-@app.route('/challenges')
-@jeopardy_mode_required
-def challenges():
-    """Display the challenge scoreboard."""
-
-    challenges_data = _challenges()
-
-    return render_template('challenges.html', **challenges_data)
 
 # For emergancy uses only!
 @app.route('/admin/fixHints', methods=['GET','POST'])
@@ -634,9 +584,58 @@ def _manual_info(team_id, challenge_id):
 
     return len(teams_ids) > 0, chal_points[0]['points'] if len(chal_points) > 0 else False
 
+@app.route('/team')
+@attackdefense_mode_required
+@team_required
+@login_required
+def team():
+    """Render a page with useful information about one's team."""
 
-@cache.cached(timeout=30)
-def _challenges():
+    db_conn = get_db_connection()
+    cur = db_conn.cursor()
+    # get the user's own team
+    cur.execute('SELECT * FROM teams WHERE id = %s',
+                [current_user.team_id])
+    team = cur.fetchone()
+    if team is None:
+        cur.close()
+        flash('Your team id is does not match any team', 'error')
+        return redirect(url_for('index'))
+    # get the members of the user's own team
+    cur.execute('SELECT * FROM users WHERE team_id = %s',
+                [current_user.team_id])
+    members = cur.fetchall()
+    # for each service get the number of attacks suffered and inflicted the
+    # user's team
+    cur.execute((
+        'SELECT S.name AS service_name, '
+        '       COUNT(A.flag) AS suffered, '
+        '       (SELECT COUNT(A1.flag) '
+        '        FROM active_flags AS F1 '
+        '        JOIN service_attacks AS A1 ON F1.flag = A1.flag '
+        '        WHERE A1.team_id = F.team_id AND F1.service_id = F.service_id '
+        '       ) AS inflicted '
+        'FROM services AS S '
+        'JOIN active_flags AS F ON S.id = F.service_id '
+        'LEFT JOIN service_attacks AS A ON F.flag = A.flag '
+        'WHERE F.team_id = %s '
+        'GROUP BY F.team_id, F.service_id, S.name'),
+        [current_user.team_id])
+    attacks = cur.fetchall()
+    cur.close()
+
+    return render_template('team.html', team=team, members=members, attacks=attacks)
+
+@app.route('/challenges')
+@jeopardy_mode_required
+def challenges():
+    """Display the challenge scoreboard."""
+
+    challenges_data = _challenges()
+    return render_template('challenges.html', **challenges_data)
+
+#@cache.cached(timeout=30)
+def _challenges(mode = 'default'):
     db_conn = get_db_connection()
     cur = db_conn.cursor()
     # get the challenges
@@ -709,6 +708,14 @@ def _challenges():
     # sort the scoreboard by total points
     scoreboard = sorted(scoreboard, key=lambda x: x['points'], reverse=True)
 
+    if(mode == 'Points'):
+        for i, team in enumerate(scoreboard):
+            team_tmp = scoreboard[i]
+            team_tmp['position'] = i + 1
+            scoreboard[i] = team_tmp
+        # This returns with the scoreboard organized by the amount of points.
+        return scoreboard
+
     # charts computation
     graph_template = {
         "type": "serial",
@@ -779,7 +786,6 @@ def _challenges():
             if chal['timestamp'] is not None:
                 user_points.append([chal['timestamp'].timestamp(), chal['points']])
                 challenges_graph_dict[chal_id].append([chal['timestamp'].timestamp(), 1])
-        print(board_entry)
 
         # sort the list by date
         user_points = sorted(user_points, key=lambda x: x[0])
@@ -1037,7 +1043,7 @@ def scoreboard():
     return render_template('scoreboard.html', rnd=rnd, time_left=seconds_left, **scoreboard_data)
 
 #@cache.cached(timeout=60)
-def _scoreboard(rnd):
+def _scoreboard(rnd, mode = 'default'):
     db_conn = get_db_connection()
     cur = db_conn.cursor()
 
@@ -1076,6 +1082,7 @@ def _scoreboard(rnd):
     services_status = cur.fetchall()
     for ss in services_status:
         board[ss['team_id']]['services'][ss['service_id']] = (ss['successful'], ss['timestamp'])
+
     # set default values
     for team_id in board:
         for service in services:
@@ -1083,6 +1090,7 @@ def _scoreboard(rnd):
                 _ = board[team_id]['services'][service['id']]
             except KeyError:
                 board[team_id]['services'][service['id']] = (2, '???')
+
     # normalize scores avoiding divisions by 0. If the score table is empty
     # (it shouldn't, we can initialize it with 0s) assume the max scores to
     # be 0. The scoreboard will anyway result empty since the teams are
@@ -1104,10 +1112,12 @@ def _scoreboard(rnd):
         board[s['team_id']]['defense_scores'].append([int(s['round']), int(s['defense'])])
         board[s['team_id']]['total_scores'].append([int(s['round']), int(0.6 * s['attack'] + 0.4 * s['defense'])])
 
+    # The team scores. Should include the service checks here too? If corrupted or not?
+    # Could just add x points for the service being up? Or, these could be put in as a percentage too?
     for team in board.values():
         team['ratio_attack'] = team['attack'] * 100 / max_attack
         team['ratio_defense'] = team['defense'] * 100 / max_defense
-        team['score'] = 0.6 * team['ratio_attack'] + 0.4 * team['ratio_defense']
+        team['score'] = 0.5 * team['ratio_attack'] + 0.4 * team['ratio_defense']
 
     # sort the board in descending order with respect to the score: the
     # sorted structure is a list of board values, we just leave out the
@@ -1115,9 +1125,18 @@ def _scoreboard(rnd):
     sorted_board = sorted([t[1] for t in board.items()],
                           key = lambda x: x['score'],
                           reverse = True)
+
+    position_dict = {}
     # add a position index to each team
     for i, team in enumerate(sorted_board):
         team['position'] = i+1
+
+        team_name = team['team'].replace(' ','')
+        position_dict[team_name] = i + 1
+
+    # To get the positional ranking data of each team in the attack/defense mode
+    if(mode == 'Points'):
+        return position_dict
 
     # fill graph lists
     attack_graph = []
@@ -1133,7 +1152,76 @@ def _scoreboard(rnd):
     return {'services': services, 'board': sorted_board, 'labels': labels,
             'attack_graph': attack_graph, 'defense_graph': defense_graph,
             'total_graph': total_graph,
-            'min_x': 0, 'max_x': rnd, 'min_y': 0, 'max_y': None}
+            'min_x': 0, 'max_x': rnd, 'min_y': 0, 'max_y': None }
+
+@app.route('/score')
+def total_score():
+    '''
+    Displays the total score of the contest to the user.
+    '''
+
+    sorted_list = _total()
+    return render_template('final_score.html', scores=sorted_list)
+
+def _total():
+    '''
+    Will give a view of the actual standings of each team.
+    These are based upon the rankings on the two types of challenges.
+
+    A little weird because the wargame challenges have the blue team challenges? Meh, it'll work!
+    The score of each will be stored upon calculation, per team. Then, stored into two seperate columns in a table:
+    total_scores: team_id, wargame, ad
+
+    From there, I can pull out the values to make a more accurate estimated.
+    '''
+
+    # Get the attack/defense rankings
+    db_conn = get_db_connection()
+    with db_conn.cursor() as cur:
+        cur.execute('SELECT id AS rnd, timestamp FROM rounds ORDER BY id DESC LIMIT 1')
+        res = cur.fetchone()
+    rnd = res['rnd']-1 if res is not None and res['rnd'] else 0
+    ad = _scoreboard(rnd, mode = 'Points')
+
+    # Get the wargame rankings
+    wargame = _challenges(mode = 'Points')
+
+    placing_info = []
+    for index in range(len(wargame)):
+        user = (wargame[index]['user']).replace(' ','')
+        wargame_position = wargame[index]['position']
+        wargame_points = wargame[index]['points']
+        ad_pos = ad[user]
+        total_pos = wargame_position + ad_pos
+
+        # teamname, wargame_position, total position
+        print('User ' + user + ' attack/defense pos: ' + str(ad_pos) +' wargame postion: '  + str(wargame_position) + ' total_pos: '+ str(total_pos))
+
+        placing_info.append((wargame[index]['user'], wargame_position, total_pos, ad_pos))
+    ranked = _sort_rankings(placing_info)
+
+    # Fixes the overall rankinging
+    overall = []
+    place = 1
+    for rank in ranked:
+        overall.append((rank[0],rank[1],place,rank[3]))
+        place +=1
+
+    return overall
+
+def _sort_rankings(placing_info):
+    for index in range(len(placing_info)-1,0,-1):
+        for i in range(index):
+            if placing_info[i][2]>placing_info[i+1][2]:
+                temp = placing_info[i]
+                placing_info[i] = placing_info[i+1]
+                placing_info[i+1] = temp
+            elif(placing_info[i][2] == placing_info[i +1][2]):
+                if(placing_info[i][1] > placing_info[i+1][1]):
+                    temp = placing_info[i]
+                    placing_info[i] = placing_info[i+1]
+                    placing_info[i+1] = temp
+    return placing_info
 
 @app.route('/credits')
 def credits():

@@ -75,17 +75,17 @@ $(document).ready(function() {
     var hours, minutes, seconds;
     var seconds_left = {{ time_left }};
     var countdown = document.getElementById("countdown");
-    
+
     setInterval(function () {
         if(seconds_left <= 0 || seconds_left % 600 == 0) {
             window.location.reload(true);
         }
-        
+
         seconds_left = seconds_left - 1;
 
         hours = parseInt(seconds_left / 3600);
         s_left = seconds_left % 3600;
-         
+
         minutes = parseInt(s_left / 60);
         seconds = parseInt(s_left % 60);
 

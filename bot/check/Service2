@@ -1,0 +1,9 @@
+#!/bin/bash
+page=$(curl http://$1:80)
+
+if [ -z "$page" ];
+then
+  exit 1
+else
+  exit 0
+fi

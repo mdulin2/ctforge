@@ -1,0 +1,4 @@
+#!/bin/bash
+# https://unix.stackexchange.com/questions/87405/how-can-i-execute-local-script-on-remote-machine-and-include-arguments
+
+ssh -i ~/maxwell.pem ubuntu@$1 "bash -s" < ./bot/dispatch/Service3Helper.sh "$2"
