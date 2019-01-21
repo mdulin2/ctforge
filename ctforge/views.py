@@ -1012,7 +1012,7 @@ def teams():
     db_conn = get_db_connection()
     with db_conn.cursor() as cur:
         # get teams
-        cur.execute('SELECT id, name FROM teams ORDER BY id')
+        cur.execute('SELECT id, name, ip FROM teams ORDER BY id')
         teams = cur.fetchall()
         # get users
         cur.execute(('SELECT id, team_id, name, surname '

@@ -57,7 +57,7 @@ class FixForm(FlaskForm):
 class UserForm(FlaskForm):
     team_id = IntegerField('team_id', validators=[validators.Optional()])
     name = StringField('name', validators=[validators.DataRequired()])
-    surname = StringField('surname', validators=[validators.DataRequired()])
+    surname = StringField('surname', validators=[])
     mail = StringField('mail', validators=[validators.DataRequired()])
     password = StringField('password')
     admin = BooleanField('admin')

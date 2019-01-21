@@ -194,8 +194,6 @@ class Worker(threading.Thread):
 
         print(os.path.join(config['CHECK_SCRIPT_PATH'], 'Service'+ str(self.service.id)))
         status = self._execute(os.path.join(config['CHECK_SCRIPT_PATH'], 'Service'+ str(self.service.id)))
-        print(status)
-        return
 
         if status == -1 or status > 125:
             # our fault: we don't add anything in the integrity_checks table
