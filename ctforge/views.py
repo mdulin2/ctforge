@@ -1223,12 +1223,12 @@ def _sort_rankings(placing_info):
                     placing_info[i+1] = temp
     return placing_info
 
-@app.route('/credits')
-def credits():
+@app.route('/sponsors')
+def sponsors():
     return render_template('credits.html')
 
-@app.route('/design')
-def design():
+@app.route('/rules')
+def rules():
     return render_template('design.html')
 
 @app.route('/')

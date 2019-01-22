@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         {% block head %}
-        <title>DCTF2017 - {% block title %}{% endblock %}</title>
+        <title>Spokane Mayor CTF - {% block title %}{% endblock %}</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="description" content="DAIS CTF2016">
@@ -33,7 +33,7 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="{{ url_for('index') }}">DCTF2017</a>
+                    <a class="navbar-brand" href="{{ url_for('index') }}">Spokane Mayor CTF 2019</a>
                 </div>
                 <div class="collapse navbar-collapse">
                     <ul class="nav navbar-nav">
@@ -43,11 +43,11 @@
                     {% if config.ATTACKDEFENSE_ACTIVE %}
                         <li {% if request.path == url_for('scoreboard') %}class="active"{% endif %}><a href="{{ url_for('scoreboard') }}">CTF Scoreboard</a></li>
                     {% endif %}
-                        <li {% if request.path == url_for('design') %}class="active"{% endif %}><a href="{{ url_for('design') }}">CTF Design</a></li>
+                        <li {% if request.path == url_for('rules') %}class="active"{% endif %}><a href="{{ url_for('rules') }}">CTF Rules</a></li>
                     {% if config.ATTACKDEFENSE_ACTIVE %}
                         <li {% if request.path == url_for('teams') %}class="active"{% endif %}><a href="{{ url_for('teams') }}">Teams</a></li>
                     {% endif %}
-                        <li {% if request.path == url_for('credits') %}class="active"{% endif %}><a href="{{ url_for('credits') }}">Credits</a></li>
+                        <li {% if request.path == url_for('sponsors') %}class="active"{% endif %}><a href="{{ url_for('sponsors') }}">Sponsors</a></li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         <li class="dropdown">
@@ -77,9 +77,8 @@
             {% endblock %}
             {% block footer %}
             <hr>
-            <footer>
-                <p class="muted credit">A <a href="https://secgroup.github.io/">c00kies@venice</a> production | Join us on <a href="https://seclabunive.slack.com/messages">Slack</a></p>
-            </footer><!-- /footer -->
+
+            <footer></footer>
             {% endblock %}
         </div> <!-- /container -->
     {% if current_user.is_authenticated and current_user.admin %}

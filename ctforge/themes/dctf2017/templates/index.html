@@ -2,33 +2,95 @@
 {% block title %}Home{% endblock %}
 {% block content %}
 
-<div class="jumbotron"></div>
+<h1>Welcome to the Spokane Mayor's Cyber Cup 2019!</h1>
+<p>
+    The first question is <i> 'what is a Capture the Flag (CTF) competition?' </i> A CTF is a cybersecurity competition with the goal to challenge everyone involved to think about problems in interesting ways. Even though the bulk of the challenges tend to be cybersecurity based, other interesting problems come into play, such as steganography, cryptography and social engineering.
+</p>
 
-<p class="lead">Deep Space <del>DAIS</del> CTF (DCTF) is a Capture The Flag hacking contest
-in which a number of alien races fight independently against each other in
-order to tower over the galactic empire.</p>
+<p>
+    The second question is '<i>why should I participate?</i>' There are two main perspectives: cybersecurity is awesome and this looks great for jobs/internships. Cybersecurity has over <b>1.5 million jobs</b> open at the moment! The industry is exciting, important and ever-changing. If you are interested in the industry, CTFs are a wonderful way to get into cybersecurity. Secondly, employers  want somebody who is passionate about what they do, not just someone who wants a paycheck. CTF's are a wonderful way to demonstrate passion, which looks good to potential employers. If you fall into either of these categories, please give this a chance!
+</p>
+<p>
+    The final question is <i>'who is invited?''</i> Even though you are probably thinking <i>cyber security is much too difficult for me</i>, 1) cybersecurity is not as hard as you think, 2) this is a learning experience! The goal of the competition is to <b>learn and prosper</b>, not to assemble the greatest hackers of all time. There will be people on staff ready to help all contestants during the competition. We are bringing in security professionals from <b> Risk Lens, Intrinium and the Spokane Security Collation </b> to come help out during the contest.
+</p>
 
-<div class="row">
-    <div class="col-md-4">
-        <p>The goal of each team is to maintain a set of services such that they
-        remain available and uncompromised throughout the contest. Each team also has
-        to attempt to compromise the other teams' services. Since all the teams have
-        access to a copy of the same virtual machine containing the vulnerable
-        services, each team has to find vulnerabilities in its host and fix them
-        without disrupting the services.</p>
-    </div>
-    <div class="col-md-4">
-        <p>At the same time, the teams have to leverage their knowledge about the
-        vulnerabilities they find to compromise the servers run by other teams.
-        Compromising a service allows a team to bypass the service's security
-        mechanisms and to "capture the flag" associated with the service. The team
-        that has the best combination of attack and defense skills wins.</p>
-    </div>
-    <div class="col-md-4">
-        <p>In parallel with the main contest, a number of side challenges are
-        left to be solved to the bravest participants. Since points earned by
-        solving challenges do not contribute to the score of the teams,
-        these problems must be solved individually.</p>
-    </div>
-</div>
+<h3>
+Perks
+</h3>
+
+<p>
+Here's a list of perks about the event:
+<ul>
+
+<li>
+<b>Free food!</b>
+</li>
+<li>
+Security professionals to chat and learn from.
+</li>
+<li>
+This should be a good event to network at if you are looking for jobs or internships.
+</li>
+<li>
+Fun way to learn about secure software development.
+</li>
+<li>
+Prizes at the end of the competition.
+</li>
+</ul>
+</p>
+<h2> The Competition</h2>
+
+<p>We at Gonzaga University's Makers and Developers (GU MAD) club are very hyped
+that you are interested in computer security and
+contributing to a learning environment that will benefit us all. It gives
+us great pleasure to be hosting this event! We've prepared a variety of challenges with both an attack-and-defend style and classic jeopardy style challenges.</p></p>
+
+<p>To <b>register</b>, please go <a href="/Registration">here</a> and add your team. You
+    may register with up to three members, or five if two of your team members
+    are underclassmen.</p>
+
+<h2> Preparation </h2>
+ <p>It would be wise to be familiar with the following technologies when competing:</p>
+ <ul>
+	<li>SSH: Teams will connect to administrate the servers using SSH and log into wargame challenges.</li>
+	<li>Linux: The attack/defend boxes will be running a Ubuntu 16.04 LTS. Teams should be familiar with these basic principles:
+	<li>Basic directory navigation.  </li><ul>
+	<li>Command line text editor (vim, emacs, nano, etc.) Only takes a few minutes to pick one of these classic text editors up! </li> </li>
+    <li>Search tools, such as awk, grep, etc. </li></ul>
+	<li>Passion to learn: The most important skill to have! </li>
+</ul>
+
+<p>These skills would be nice...But, do not panic! This is supposed to be a learning experience for everyone involved! You are not expected to know these going in.</p>
+<ul>
+    <li>Web Application Development:<ul>
+        <li>NodeJS</li>
+        <li>JavaScript </li>
+        <li>HTML</li>
+    </ul></li>
+    <li> Python: Version 2.7 </li>
+    <li> C/C++: Use the gcc and g++ compilers in Linux. </li>
+    <li> Assembly: x86 architecture knowlege of general registers, stack and how to use GDB. </li>
+    <li> Cryptography: RSA encryption and basic understanding of a symmetric key cipher. </li>
+    <li> Social Engineering: How are people manipulated? What does a phishing email look like? </li>
+    <li>Ability to read log files.</li>
+</ul>
+
+
+<p>Types of vulnerabilities that students should watch out for:<p>
+<ul>
+    <li> Directory traversal</li>
+    <li> SQL Injection </li>
+    <li> Buffer overflows</li>
+    <li> Access Control Issues </li>
+    <li> Poorly written logic </li>
+    <li> Uncontrolled format string </li>
+</ul>
+
+<p>Other:</p>
+<ul>
+    <li><a href="https://www.owasp.org/index.php/Top_10-2017_Top_10">OWASP Top 10</a></li>
+    <li><a href="https://en.wikipedia.org/wiki/Category:Computer_security_exploits">More exploits</a></li>
+</ul>
+
 {% endblock %}
