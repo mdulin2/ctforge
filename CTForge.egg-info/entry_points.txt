@@ -1,0 +1,4 @@
+[console_scripts]
+ctfbot = ctforge.scripts.ctfbot:main
+ctforge = ctforge.scripts.ctforge:main
+
