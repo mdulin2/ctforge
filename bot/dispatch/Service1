@@ -1,4 +1,4 @@
 #!/bin/sh
 
-# Will need to add an IP for this, with correct info.
-ssh -i ~/maxwell.pem ubuntu@$1 "echo 'flag:$2' > /tmp/Services/ServiceA/Flag.txt"
+# Parameter 1 is the IP, parameter 2 is the flag. 
+ssh -i ~/Score.pem ubuntu@$1 'bash -s' < ./bot/dispatch/Service1Helper.sh $2

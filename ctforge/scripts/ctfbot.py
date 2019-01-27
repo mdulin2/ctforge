@@ -173,7 +173,7 @@ class Worker(threading.Thread):
         complete."""
 
         # execute the script ignoring its return status
-        self._execute(os.path.join(config['DISPATCH_SCRIPT_PATH'], 'Service' + str(self.service.id +1)))
+        self._execute(os.path.join(config['DISPATCH_SCRIPT_PATH'], 'Service' + str(self.service.id)))
 
     def _check_service(self):
         """Check if a given service on a given host is working as expected by
@@ -220,6 +220,7 @@ class Worker(threading.Thread):
         # set status of the service to corrupted by default
         status = 1
         command = ' '.join([script_name, self.team.ip, self.flag])
+        print(command)
         try:
             logger.debug(self._logalize("Executing {}".format(command)))
             # ignore stdout and stderr
