@@ -1154,8 +1154,8 @@ def _scoreboard(rnd, mode = 'default'):
             'total_graph': total_graph,
             'min_x': 0, 'max_x': rnd, 'min_y': 0, 'max_y': None }
 
-@app.route('/score')
-def total_score():
+@app.route('/totalscore')
+def totalscore():
     '''
     Displays the total score of the contest to the user.
     '''
