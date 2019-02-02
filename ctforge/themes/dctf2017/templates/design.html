@@ -2,126 +2,185 @@
 {% block title %}CTF Design{% endblock %}
 {% block content %}
 
+	
 <h1>Rules and Regulations</h1>
+	
 
-<p>Please read the following, and then go <a href="/Registration/Register">here</a> to register your team. We're excited to have you!</p>
+	
 
-<h3>General</h3>
+	<h3>General</h3>
+	<ul>
+	    <li>Date: February 9th, 2018</li>
+	    <li>Location: Gonzaga University School of Engineering and Applied Science.</li>
+
+
+	    <li>Slack channel for teams to communicate.</li>
+	    <li>Time estimate: 5 hours of hacking, with lunch break and additional snack break.  </li>
+
+
+
+	</ul>
+	
+
+	<h3>Atmosphere</h3>
+	<ul>
+	    <li>Should be a fun and learning atmosphere.</li>
+	    <li>People should be helpful! Judges would <b>love to help you!</b></li>
+	</ul>
+	
+
+	<h3>
+	    Rules
+	</h3>
+	<ul>
+	    <li>No external, automated tools besides nmap unless otherwise specified(I'm talking about using Kali and
+	        other things). We believe that you are a smart and capable human beings that are fully capable of solving problems without tools doing it for you! Using google and other non-automated tools for answers/help is completely fine (encouraged) though.</li>
+	        <li>No DOS attacks on machines.</li>
+	        <li>Do not attack the scoreboard site. If this is discovered, you will be disqualified.</li>
+	        <li>Hints are allowed by the people around. However, points <i>may</i> be taken off for hints. Want the opportunity for people to have fun and solve challenges on their own first, then ask for help if needed.</li>
+	        <li>None of the challenges are BRUTE FORCE. So, do not try to brute force a flag.</li>
+        <li>Do not share flags with other teams (even if there are from the same school).</li>
+         <li>Before asking for help on a question, please attempt it! Do not just ask help from the judges without attempting the challenge first.</li>
+<li>Do not be a **** to the challenges. If you find a way to ruin a team’s box, break a challenge or something along these lines then please do not break anything. The goal is for people to learn through this, not to ruin the competition. </li>
+
+	</ul>
+	
+
+	<h3>
+	    Leagues:
+	</h3>
+	<p>
+	     In order to set the bar for entry as low as possible there will be two different leagues: Canaries and Swallows. Depending on the team’s skill level, choose which league your team will enter.
+	</p>
+	<p>
+	The two main differences between the leagues are in Canary a team can <i>get as much help as the team would like </i>(deemed that they gave the challenge a reasonable try), while the Swallow league will deduct points for large hints (but not small hints). Secondly, the competition will be harder in the Swallow league. If not enough teams sign up for one league, we will move teams up/down in order to keep the leagues even.
+	</p>
+	
+
+	<h5> Canary </h5>
+	<p>
+	Of the two leagues, Canary is considered to be the lower of the leagues. Here is when you should be in Canary:
+	<ul>
+	    <li>
+	        Have never taken a computer security course <i>and</i>
+	    </li>
+	    <li>
+	        Do not consider yourself knowledgeable about vulnerabilities in your area of expertise <i>and</i>
+	    </li>
+	    <li>
+	        Have never participated in a CTF before.
+	    </li>
+	</ul>
+	The creators of the competition would like to stress that this is a step in the path of learning! Even if you do not know anything going into the contest about cyber security, you will be the biggest winner of the day because of the amount of knowledge you gained from the contest. The goal of this contest is to teach students about the wonderful world of cyber security.
+	</p>
+	
+
+	<h5>Swallow</h5>
+	<p>
+	This league falls into everything above Canary.
+	<ul>
+	    <li>
+	        <i>Have</i> taken a computer security course <i>or</i>
+	    </li>
+	    <li>
+	        Consider yourself knowledgeable about vulnerabilities in your area of expertise. <i>or</i>
+	    </li>
+	    <li>
+	        <i>Have</i> participanted in a CTF before.
+	    </li>
+	</ul>
+	</p>
+	
+
+	<h3>Attack/Defense:</h3>
+	<p>Each team will be assigned a server with multiple <b>services</b> designed specifically insecure for the contest. The exploitation of these services can lead hackers to do malicious things on the server (Find the flag). The goal is to patch(fix) your own services while exploiting the other teams’ applications. Teams will have complete access to the complete source code, as well as documentation on the service. Furthermore, startup, shutdown and reset scripts will be provided, as well as network traffic dumps for each service. At the start of the contest, every team will have the exact same services, with the same vulnerabilities present. </p>
+	
+
+	<h3>Scoring</h3>
+	<p> There are three main ways of scoring:
+	<ul>
+	    <li>
+	        Submitting stolen flags to the scoreboard website.
+	    </li>
+	    <li>
+	        Keeping services online and functional.
+	    </li>
+	    <li>
+	        Submitting 'blue team' reports, or defensive reports. If you believe you have a malicious request being made on your application, then you can submit it for points (limit 2 per service).
+	    </li>
+	</ul>
+In order to 
+	</p>
+
+	
+	<p>
+	    All of the flags will be in the form flag flag{15_alphabetic_characters} for the attack/defense challenges. Also, all of the flags will be in the <b>'/etc/Services/ServiceA'</b>,<b>'/etc/Services/ServiceB'</b>, <and <b>'/etc/service_D'</b> directories depending on the service. ServiceC has the flag in the database. 
+	</p>
+	
+
+	<h3>Rounds</h3>
+	<p>
+	    The contest will have 6 one-hour rounds, with one flag associated with each service. At the beginning of each round all services will be issued new flags. So, this will give teams the opportunity to exploit the service once again to get new points. 
+	</p>
+<p>
+Check scripts will run in order to validate the services are up and running correctly. 
+</p>
+	
+
+	
+
+	<h3>Wargame</h3>
+	<p>
+	    In jeopardy there are several categories where you pick a question, then attempt to answer it. The same goes with wargame CTF, with the only difference being that the questions are  challenges of some kind, where the answer is the flag. The current categories are Software(Web/Native),  Log Analysis/Steganography, Cryptography, Social Engineering and Miscellaneous. The flags for these challenges do not have a set format. 
+	</p>
+	
+
+	<h3>Scoring</h3>
+	<ul>
+	    <li>Solving a wargame will give x number of points, depending on the difficulty and effort needed
+	        to solve the challenge.</li>
+	    <li>
+	        A few of the wargames will be very hard to automate. So, people (known as judges) will manually have to look at them.
+	    </li>
+	    <li>
+	        To receive the points, go to the challenge to turn-in and submit the flag for the service under the wargame tab. 
+	    </li>
+	
+
+	</ul>
+	
+<h2>Scoring</h2>
+<p>
+With their being two types of challenges (attack/defense and wargame) an overall score needed to be accessed. This is done by taking the two placements, adding them together and dividing by two. The teams with the lowest scores are ranked the highest. However, the split for the overall score is weighted 60-40 in the favor of the wargame challenges. So, pick your strategy wisely. 
+</p>
+
+<h2>Tips</h2>
+<p>
+These challenges are not impossible; in general one should 1) understand the problem and what it is asking for 2) Gather the information about what technologies/strategies are being used 3) Flip the evil bit; think like an attacker. 
+</p>
+
+<p>
+	Besides the tips above, here are a few general best practices: 
 <ul>
-    <li>Date: February 9th, 2018</li>
-    <li>Location: Gonzaga University School of Engineering and Applied Science.</li>
-    <li>Teams of 1-3, mainly. If there is a freshman or sophomore on the team, then they are allowed
-        5 members. Freshman and sophomores are highly encouraged because we want them to come and learn!</li>
-    <li>Slack channel for teams to communicate.</li>
-    <li>Time estimate: 5 hours. </li>
-    <li>There are two types of challenges. Read on!</li>
+<li>
+	Look for anything that is abnormal; error messages, time delays or other issues to help you solve the challenge.
+</li>
+<li>
+	USE THE HINTS; they are very useful.</li>
+<li>
+	Understand the technology, then flip the evil bit for the challenge. 
+</li>
+<li>
+	Reading documentation will get you a long ways! It may seem annoying and tedious but it is very efficient. We reccommend the <i>man</i> pages. 
+</li>
+<li>
+	Have fun! :) 
+</li>
+
 </ul>
 
-<h3>Atmosphere</h3>
-<ul>
-    <li>Should be a fun and learning atmosphere.</li>
-    <li>People should be helpful! Judges would <b>love to help you!</b></li>
-</ul>
 
-<h3>
-    Rules
-</h3>
-<ul>
-    <li>No external, automated tools besides nmap unless otherwise specified(I'm talking about using Kali and
-        other things). We believe that you are a smart and capable human beings that are fully capable of solving problems without tools doing it for you! Using google and other non-automated tools for answers/help is completely fine (encouraged) though.</li>
-        <li>No DOS attacks on machines.</li>
-        <li>Do not attack the scoreboard site.</li>
-        <li>Hints are allowed by the people around. However, points will be taken off for this. Want the opportunity for people to have fun and solve challenges on their own first!</li>
-        <li>None of the challenges are BRUTE FORCE. So, do not try to brute force a flag.</li>
-</ul>
-
-<h3>
-    Leagues:
-</h3>
-<p>
-     In order to set the bar for entry as low as possible there will be two different leagues: Canaries and Swallows. Depending on the teams skill level, choose which league your team will enter.
-</p>
-<p>
-The two main differences between the leagues are in Canary a team can <i>get as much help as the team would like </i>(deemed that they gave the challenge a reasonable try), while the Swallow league will deduct points for large hints (but not small hints). Secondly, the competition will be harder in the Swallow league.
 </p>
 
-<h5> Canary </h5>
-<p>
-Of the two leagues, Canary is considered to be the lower of the leagues. Here is when you should be in Canary:
-<ul>
-    <li>
-        Have never taken a computer security course <i>and</i>
-    </li>
-    <li>
-        Do not consider yourself knowledgable about vulnerabilities in your area of expertise <i>and</i>
-    </li>
-    <li>
-        Have never participanted in a CTF before.
-    </li>
-</ul>
-The creators of the competition would like to stress that this is a step in the path of learning! Even if you do not know anything going into the contest about cyber security, you will be the biggest winner of the day because of the amount of knowledge you gained from the contest. The goal of this contest is to teach students about the wonderful world of cyber security.
-</p>
-
-<h5>Swallow</h5>
-<p>
-This league falls into everything above Canary.
-<ul>
-    <li>
-        <i>Have</i> taken a computer security course <i>or</i>
-    </li>
-    <li>
-        Consider yourself knowledgable about vulnerabilities in your area of expertise. <i>or</i>
-    </li>
-    <li>
-        <i>Have</i> participanted in a CTF before.
-    </li>
-</ul>
-</p>
-
-<h3>Attack/Defense:</h3>
-<p>Each team will be assigned a server with multiple <b>services</b> designed specifically  insecure for the contest. The exploitation of these services can lead hackers to do malicious things on the server. The goal is to patch(fix) your own services while exploiting the other teams applications. Teams will have complete access to the complete source code, as well as documentation on the service. Furthermore, startup, shutdown and reset scripts will be provided. At the start of the contest, every team will have the exact same services, with the same vulnerabilities present. </p>
-
-<h3>Scoring</h3>
-There are three main ways of scoring:
-<ul>
-    <li>
-        Submitting stolen flags to the scoreboard website.
-    </li>
-    <li>
-        Keeping services online and functional.
-    </li>
-    <li>
-        Submitting 'blue team' reports, or defensive reports. If you believe you have a malicious request being made on your application, then you can submit it for points (limit 2 per service).
-    </li>
-</ul>
-
-<!-- flg{12345678901234A} Good job finding this! -->
-<p>
-    All of the flags will be in the form flag flag{15_alphabetic_characters}. Also, all of the flags will be in the <b>'/etc/service_A'</b>,<b>'/etc/service_B'</b>, <b>'/etc/service_C'</b>,<b>'/etc/service_D'</b> directories depending on the service. Furthermore, if an exploit is found that does not give off a flag (such as getting admin on a website) then the flag may appear.
-</p>
-
-<h3>Rounds</h3>
-<p>
-    The contest will have 6 one-hour rounds, with one flag associated with each service. At the beginning of each round all services will be issued new flags. So, this will give teams the opportunity to exploit the service once again.
-</p>
-
-
-<h3>Jeopardy</h3>
-<p>
-    In jeopardy there are several categories where you pick a question, then attempt to answer it. The same goes with jeopardy CTF, with the only difference being that the questions are  challenges of some kind, where the answer is the flag. The current categories are Software(Web/Native),  Log Analysis/Steganography, Cryptography, Social Engineering and Miscellaneous.
-</p>
-
-<h3>Scoring</h3>
-<ul>
-    <li>Solving a wargame will give x number of points, depending on the difficulty and effort needed
-        to solve the challenge.</li>
-    <li>
-        A few of the wargames will be very hard to automate. So, people (known as judges) will manually have to look at them. This includes the XSS challenge and a few others.
-    </li>
-    <li>
-        To receive the points, go to the challenge turn-in and submit the flag.
-    </li>
-
-</ul>
 
 {% endblock %}
