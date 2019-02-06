@@ -639,10 +639,11 @@ def _challenges(mode = 'default'):
     db_conn = get_db_connection()
     cur = db_conn.cursor()
     # get the challenges
-    cur.execute('SELECT * FROM challenges')
+    cur.execute('SELECT * FROM challenges ORDER BY points')
     res = cur.fetchall()
-    chals = {c['id']: c for c in res} if len(res) != 0 else dict()
 
+    chals = {c['id']: c for c in res} if len(res) != 0 else dict()
+	
     # get only the users who solved at least one challenge that are not admin
     # and not hidden, sorted by timestamp. Along with the users get the
     # information about the solved challenges
@@ -837,7 +838,8 @@ def _challenges(mode = 'default'):
     challenges_graph['valueAxes'][0]['title'] = 'Solvers'
     challenges_graph['graphs'] = challenges_graphs
     challenges_graph['dataProvider'] = challenges_data_provider
-
+	
+    res=chals
     return {'challenges': chals, 'scoreboard': scoreboard, 'users_graph': users_graph, 'challenges_graph': challenges_graph }
 
 
@@ -1192,7 +1194,7 @@ def _total():
         wargame_position = wargame[index]['position']
         wargame_points = wargame[index]['points']
         ad_pos = ad[user]
-        total_pos = wargame_position + ad_pos
+        total_pos = (0.6 *wargame_position) + (0.4 * ad_pos)
 
         # teamname, wargame_position, total position
         print('User ' + user + ' attack/defense pos: ' + str(ad_pos) +' wargame postion: '  + str(wargame_position) + ' total_pos: '+ str(total_pos))
