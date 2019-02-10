@@ -641,9 +641,8 @@ def _challenges(mode = 'default'):
     # get the challenges
     cur.execute('SELECT * FROM challenges ORDER BY points')
     res = cur.fetchall()
-
     chals = {c['id']: c for c in res} if len(res) != 0 else dict()
-	
+  
     # get only the users who solved at least one challenge that are not admin
     # and not hidden, sorted by timestamp. Along with the users get the
     # information about the solved challenges
@@ -839,7 +838,6 @@ def _challenges(mode = 'default'):
     challenges_graph['graphs'] = challenges_graphs
     challenges_graph['dataProvider'] = challenges_data_provider
 	
-    res=chals
     return {'challenges': chals, 'scoreboard': scoreboard, 'users_graph': users_graph, 'challenges_graph': challenges_graph }
 
 
